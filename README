@@ -6,6 +6,6 @@ simple php use after free exploitation.
 
 jump(); to control RIP
 alloc(); to allocate memory in the heap and r/w to it
-mem(); to create a memory mapping (read/write)
-
+mem(); to create a memory mapping (allows you to read/write arbitrary addresses)
+ptr(); to leak a pointer inside a newly allocated zval (to get a valid pointer to the heap, used for alloc(), mem() etc..)
 
