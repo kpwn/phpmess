@@ -1,0 +1,11 @@
+-- phpmess --
+
+simple php use after free exploitation.
+
+@chtg57's unserialize() & __wakeup UaF as demo exploit.
+
+jump(); to control RIP
+alloc(); to allocate memory in the heap and r/w to it
+mem(); to create a memory mapping (read/write)
+
+
